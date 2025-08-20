@@ -1,11 +1,13 @@
 ﻿using CRUD_USER.Data;
 using CRUD_USER.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;                      
 namespace CRUD_USER.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class UsuariosController : ControllerBase //mostrar o controller da appi
     {
         private readonly AppDbContext _context; 
@@ -17,6 +19,7 @@ namespace CRUD_USER.Controllers
         [HttpPost]
         public async Task<IActionResult> Criar(User usuario)
         {
+            usuario.Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha); //hashing da senha
             _context.Users.Add(usuario);
             await _context.SaveChangesAsync();
             return Ok(usuario);
