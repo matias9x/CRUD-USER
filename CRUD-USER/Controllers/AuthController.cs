@@ -48,9 +48,32 @@ namespace CRUD_USER.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return Ok(new { token = tokenHandler.WriteToken(token) });
         }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
+            {
+                return BadRequest(new { message = "Email já cadastrado." });
+            }
+            var user = new User
+            {
+                Nome = model.Nome,
+                Email = model.Email,
+                Senha = BCrypt.Net.BCrypt.HashPassword(model.Senha)
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Usuário registrado com sucesso." });
+        }
 
         public class LoginModel
         {
+            public string Email { get; set; } = string.Empty;
+            public string Senha { get; set; } = string.Empty;
+        }
+        public class RegisterModel
+        {
+            public string Nome { get; set; } = string.Empty;
             public string Email { get; set; } = string.Empty;
             public string Senha { get; set; } = string.Empty;
         }
