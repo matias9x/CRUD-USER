@@ -1,6 +1,10 @@
 using CRUD_USER;
+using CRUD_USER.Controllers;
 using CRUD_USER.Data;
+using CRUD_USER.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +13,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
-
 builder.Services.AddControllers();
 builder.Services.AddInfrastrutctureSwagger();
 builder.Services.AddEndpointsApiExplorer();

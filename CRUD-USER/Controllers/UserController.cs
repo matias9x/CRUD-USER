@@ -1,12 +1,14 @@
-﻿using CRUD_USER.Data;
+﻿using CRUD_USER.Validators;
+using CRUD_USER.Data;
 using CRUD_USER.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;                      
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 namespace CRUD_USER.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class UsuariosController : ControllerBase //mostrar o controller da appi
     {
@@ -15,14 +17,22 @@ namespace CRUD_USER.Controllers
         {
             _context = context; //acessar o bd?? acho
         }
-
         [HttpPost]
-        public async Task<IActionResult> Criar(User usuario)
-        {
-            usuario.Senha = BCrypt.Net.BCrypt.HashPassword(usuario.Senha); //hashing da senha
+        public async Task<IActionResult> Create ([FromBody] CreateUserModel model)
+            {
+             await new CreateUserValidator(_context).ValidateAndThrowAsync(model); //validação do FluentValidation
+            {
+                
+            }
+            var usuario = new User
+            {
+                Nome = model.Nome,
+                Email = model.Email,
+                Senha = BCrypt.Net.BCrypt.HashPassword(model.Senha) //hashing da senha
+            };
             _context.Users.Add(usuario);
             await _context.SaveChangesAsync();
-            return Ok(usuario);
+            return Ok(new { message = "Usuário registrado com sucesso." });
         }
 
         [HttpGet]
@@ -62,6 +72,13 @@ namespace CRUD_USER.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+    }
+
+    public class CreateUserModel
+    {
+        public string Nome { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Senha { get; set; } = string.Empty;
     }
 }
 //pra cada função (Criar, Listar, BuscarPorEmail, Atualizar, Deletar) tem que ter um endpoint, rota,http
